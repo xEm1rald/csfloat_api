@@ -7,6 +7,7 @@ from .models.listing import Listing
 from .models.buy_orders import BuyOrders
 from .models.me import Me
 from .models.stall import Stall
+from .models.trade import Trade
 
 __all__ = "Client"
 
@@ -175,7 +176,15 @@ class Client:
         method = "GET"
 
         response = await self._request(method=method, parameters=parameters)
-        return response
+
+        pending_trades = [
+            Trade.from_dict(
+                raw_trade
+            )
+            for raw_trade in response.get("trades")
+        ]
+
+        return pending_trades
 
     async def get_similar(
             self, *, listing_id: int, raw_response: bool = False
@@ -369,7 +378,15 @@ class Client:
         parameters = f"/me/trades?role={role}&state=failed,cancelled,verified&limit={limit}&page={page}"
         method = "GET"
         response = await self._request(method=method, parameters=parameters)
-        return response
+
+        trades = [
+            Trade.from_dict(
+                raw_trade
+            )
+            for raw_trade in response.get("trades")
+        ]
+
+        return trades
 
     async def delete_listing(self, *, listing_id: int):
         parameters = f"/listings/{listing_id}"
