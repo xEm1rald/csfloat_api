@@ -1,6 +1,7 @@
 import aiohttp
 import re
 from aiohttp_socks.connector import ProxyConnector
+from aiohttp.resolver import ThreadedResolver
 from typing import Iterable, Union, Optional, Dict, List
 from .models.listing import Listing
 from .models.buy_orders import BuyOrders
@@ -42,10 +43,21 @@ class Client:
         self._headers = {
             'Authorization': self.API_KEY
         }
-        self._connector = ProxyConnector.from_url(self.proxy, ttl_dns_cache=300) if self.proxy else aiohttp.TCPConnector(
-            resolver=aiohttp.resolver.AsyncResolver(),
-            limit_per_host=50
-        )
+
+        safe_resolver = ThreadedResolver()
+
+        if self.proxy:
+            self._connector = ProxyConnector.from_url(
+                self.proxy,
+                ttl_dns_cache=300,
+                resolver=safe_resolver
+            )
+        else:
+            self._connector = aiohttp.TCPConnector(
+                resolver=safe_resolver,
+                limit_per_host=50
+            )
+
         self._session = aiohttp.ClientSession(connector=self._connector, headers=self._headers)
 
     async def __aenter__(self):
