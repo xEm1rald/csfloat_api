@@ -171,7 +171,7 @@ class Client:
 
     async def get_pending_trades(
             self, limit: int = 500, page: int = 0
-    ) -> Optional[dict]:
+    ) -> Optional[List[Trade]]:
         parameters = f"/me/trades?state=pending&limit={limit}&page={page}"
         method = "GET"
 
@@ -373,7 +373,7 @@ class Client:
         response = await self._request(method=method, parameters=parameters)
         return response
 
-    async def get_trade_history(self, role: str = "seller", limit: int = 30, page: int = 0):
+    async def get_trade_history(self, role: str = "seller", limit: int = 30, page: int = 0) -> Optional[List[Trade]]:
         self._validate_role(role)
         parameters = f"/me/trades?role={role}&state=failed,cancelled,verified&limit={limit}&page={page}"
         method = "GET"
