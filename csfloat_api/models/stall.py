@@ -1,15 +1,13 @@
-from typing import List, Dict, Any, Optional
+from typing import List
+from pydantic import BaseModel
 from .listing import Listing
 
+class Stall(BaseModel):
+    listings: List[Listing] = []
 
-class Stall:
-    def __init__(self, *, data: Dict[str, Any]) -> None:
-        listings_data = data.get('data')
-        if listings_data is None:
-            self._listings = []
+    def __init__(self, **data):
+        # Handle the nesting where the response usually has a 'data' key
+        if "data" in data and isinstance(data["data"], list):
+            super().__init__(listings=data["data"])
         else:
-            self._listings = [Listing(data=item) for item in listings_data]
-
-    @property
-    def listings(self) -> List[Listing]:
-        return self._listings
+            super().__init__(**data)
