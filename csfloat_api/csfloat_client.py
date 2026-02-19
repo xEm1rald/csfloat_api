@@ -149,8 +149,6 @@ class Client:
     async def get_pending_trades(self, limit: int = 500, page: int = 0) -> List[Trade]:
         parameters = f"/me/trades?state=pending&limit={limit}&page={page}"
         response = await self._request(method="GET", parameters=parameters)
-        import json
-        print(json.dumps(response.get("trades")[0], indent=2))
         return [Trade.model_validate(raw_trade) for raw_trade in response.get("trades", [])]
 
     async def get_similar(self, *, listing_id: int, raw_response: bool = False) -> Union[List[Listing], dict]:
